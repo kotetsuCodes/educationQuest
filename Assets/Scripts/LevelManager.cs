@@ -16,6 +16,9 @@ public class LevelManager : MonoBehaviour
     HashSet<string> challengeWordsInPlay = new HashSet<string>();
     LinkedList<ChallengeWord> challengeModeWords = new LinkedList<ChallengeWord>();
 
+    public float timeBetweenChallengeSelect = 0.1f;
+    private float timestamp;
+
     private void Awake()
     {
         if (instance == null)
@@ -46,8 +49,6 @@ public class LevelManager : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log("Level Manager Update() running");
-
         CheckForLevelCompletion();
         RunChallengeMode();
     }
@@ -81,7 +82,7 @@ public class LevelManager : MonoBehaviour
             }
 
             // Left
-            if (Input.GetAxis("Horizontal") < -0.8f)
+            if (Time.time > timestamp && Input.GetAxis("Horizontal") < 0.0f)
             {
                 var selectedNode = challengeModeWords.Find(selectedWord);
 
@@ -90,9 +91,11 @@ public class LevelManager : MonoBehaviour
                     selectedNode.Previous.Value.IsSelected = true;
                     selectedWord.IsSelected = false;
                 }
+
+                timestamp = Time.time + timeBetweenChallengeSelect;
             }
             // right
-            else if (Input.GetAxis("Horizontal") > 0.8f)
+            else if (Time.time > timestamp && Input.GetAxis("Horizontal") > 0.0f)
             {
                 var selectedNode = challengeModeWords.Find(selectedWord);
 
@@ -101,6 +104,8 @@ public class LevelManager : MonoBehaviour
                     selectedNode.Next.Value.IsSelected = true;
                     selectedWord.IsSelected = false;
                 }
+
+                timestamp = Time.time + timeBetweenChallengeSelect;
             }
             else if (Input.GetButtonDown("Submit"))
             {
@@ -118,6 +123,7 @@ public class LevelManager : MonoBehaviour
                     WindowsVoice.speak("That is incorrect!");
                 }
             }
+
         }
     }
 

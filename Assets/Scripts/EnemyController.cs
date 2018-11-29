@@ -9,6 +9,8 @@ public class EnemyController : PhysicsObject
     public float DamagePerHit = 0.5f;
 
     public float CollisionDistance;
+    public bool FollowPlayer = false;
+    public bool CheckForCliffs = false;
 
     bool isMovingLeft = true;
 
@@ -28,6 +30,7 @@ public class EnemyController : PhysicsObject
     readonly List<RaycastHit2D> bottomRightColliderBuffer = new List<RaycastHit2D>(1);
 
     ContactFilter2D contactFilterTerrain;
+    ContactFilter2D contactFilterThisLayer;
     ContactFilter2D contactFilterGround;
 
     // Use this for initialization
@@ -38,16 +41,18 @@ public class EnemyController : PhysicsObject
         collider2D = GetComponent<Collider2D>();
         rigidBody = GetComponent<Rigidbody2D>();
 
-        contactFilterGround.useTriggers = true;
-        contactFilterGround.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
-        contactFilterGround.useLayerMask = true;
+        contactFilterThisLayer.useTriggers = true;
+        contactFilterThisLayer.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
+        contactFilterThisLayer.useLayerMask = true;
 
         contactFilterTerrain.useTriggers = false;
         contactFilterTerrain.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
         contactFilterTerrain.useLayerMask = true;
+
+        contactFilterGround.useTriggers = false;
+        contactFilterGround.SetLayerMask(LayerMask.GetMask("Ground"));
+        contactFilterGround.useLayerMask = true;
     }
-
-
 
     protected override void ComputeVelocity()
     {
@@ -61,74 +66,17 @@ public class EnemyController : PhysicsObject
             // Debug.DrawRay(new Vector2(transform.position.x + 1, transform.position.y), Vector2.down, Color.yellow, 0.1f);
             // Debug.DrawRay(new Vector2(transform.position.x - 1, transform.position.y), Vector2.down, Color.yellow, 0.1f);
 
-            Debug.DrawLine(transform.position + Vector3.left * 1.0f, new Vector2(transform.position.x - 1.0f, transform.position.y - 100f), Color.blue, 0.1f);
-            Debug.DrawLine(new Vector2(transform.position.x + 1.0f, transform.position.y), new Vector2(transform.position.x + 1.0f, transform.position.y - 100f), Color.yellow, 0.1f);
-
-            var leftColliders = new RaycastHit2D[16];
-            var rightColliders = new RaycastHit2D[16];
-
-            bottomLeftColliderBuffer.Clear();
-            bottomRightColliderBuffer.Clear();
-
-            List<RaycastHit2D> leftColliderBuffer = new List<RaycastHit2D>();
-            List<RaycastHit2D> rightColliderBuffer = new List<RaycastHit2D>();
-
-            int leftCollisions = rigidBody.Cast(Vector2.left, contactFilterTerrain, leftColliders, CollisionDistance);
-            int rightCollisions = rigidBody.Cast(Vector2.right, contactFilterTerrain, rightColliders, CollisionDistance);
-
-            int bottomLeftCollisions = Physics2D.Raycast(transform.position + Vector3.left * 1.0f, Vector2.down, contactFilterGround, bottomLeftColliders, 100f);
-            int bottomRightCollisions = Physics2D.Raycast(transform.position + Vector3.right * 1.0f, Vector2.down, contactFilterGround, bottomRightColliders, 100f);
-
-            leftColliderBuffer.AddRange(leftColliders.Where(l => l.collider != null));
-            rightColliderBuffer.AddRange(rightColliders.Where(r => r.collider != null));
-
-            bottomLeftColliderBuffer.AddRange(bottomLeftColliders.Where(l => l.collider != null));
-            bottomRightColliderBuffer.AddRange(bottomRightColliders.Where(r => r.collider != null));
-
-            var playerDirection = getPlayerDirection(leftColliderBuffer.ToArray(), rightColliderBuffer.ToArray());
-
-            if (playerDirection < 0.0 && bottomLeftColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false)
+            if (FollowPlayer)
             {
-                move.x = playerDirection;
-                isMovingLeft = true;
+                move = getMoveForFollowPlayer(move);
             }
-            else if (playerDirection > 0.0 && bottomRightColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false)
+            else if (CheckForCliffs)
             {
-                move.x = playerDirection;
-                isMovingLeft = false;
+                move = getMoveForCheckForCliffs(move);
             }
             else
             {
-                if (
-                        isMovingLeft
-                        && (leftColliderBuffer.Any() == false
-                        || leftColliderBuffer.Any(c => c.collider != null && c.distance > 0.1f))
-                        && bottomLeftColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false
-
-                    )
-                {
-                    move.x = -0.2f;
-                    isMovingLeft = true;
-                }
-                else
-                {
-                    isMovingLeft = false;
-                }
-
-                if (
-                        isMovingLeft == false
-                        && (rightColliderBuffer.Any() == false
-                        || rightColliderBuffer.Any(c => c.collider != null && c.distance > 0.1f))
-                        && bottomRightColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false
-                    )
-                {
-                    move.x = 0.2f;
-                    isMovingLeft = false;
-                }
-                else
-                {
-                    isMovingLeft = true;
-                }
+                move = getMoveForDoNotCheckForCliffs(move);
             }
 
             bool flipSprite = (spriteRenderer.flipX ? move.x > 0.01f : (move.x < 0.01f));
@@ -142,6 +90,195 @@ public class EnemyController : PhysicsObject
             targetVelocity = move * maxSpeed;
         }
     }
+
+    Vector2 getMoveForDoNotCheckForCliffs(Vector2 move)
+    {
+        Debug.DrawLine(transform.position + Vector3.left * 1.0f, new Vector2(transform.position.x - 1.0f, transform.position.y - 100f), Color.blue, 0.1f);
+        Debug.DrawLine(new Vector2(transform.position.x + 1.0f, transform.position.y), new Vector2(transform.position.x + 1.0f, transform.position.y - 100f), Color.yellow, 0.1f);
+
+        var leftColliders = new RaycastHit2D[16];
+        var rightColliders = new RaycastHit2D[16];
+
+        bottomLeftColliderBuffer.Clear();
+        bottomRightColliderBuffer.Clear();
+
+        List<RaycastHit2D> leftColliderBuffer = new List<RaycastHit2D>();
+        List<RaycastHit2D> rightColliderBuffer = new List<RaycastHit2D>();
+
+        int leftCollisions = rigidBody.Cast(Vector2.left, contactFilterTerrain, leftColliders, CollisionDistance);
+        int rightCollisions = rigidBody.Cast(Vector2.right, contactFilterTerrain, rightColliders, CollisionDistance);
+
+        leftColliderBuffer.AddRange(leftColliders.Where(l => l.collider != null));
+        rightColliderBuffer.AddRange(rightColliders.Where(r => r.collider != null));
+
+        if (
+                isMovingLeft
+                && (leftColliderBuffer.Any() == false
+                || leftColliderBuffer.Any(c => c.collider != null && c.distance > 0.1f))
+
+            )
+        {
+            move.x = -0.2f;
+            isMovingLeft = true;
+        }
+        else
+        {
+            isMovingLeft = false;
+        }
+
+        if (
+                isMovingLeft == false
+                && (rightColliderBuffer.Any() == false
+                || rightColliderBuffer.Any(c => c.collider != null && c.distance > 0.1f))
+            )
+        {
+            move.x = 0.2f;
+            isMovingLeft = false;
+        }
+        else
+        {
+            isMovingLeft = true;
+        }
+
+        return move;
+    }
+
+    Vector2 getMoveForCheckForCliffs(Vector2 move)
+    {
+        Debug.DrawRay(rigidBody.transform.position, new Vector2(-1, -1), Color.blue, 0.1f);
+        Debug.DrawRay(rigidBody.transform.position, new Vector2(1, -1), Color.blue, 0.1f);
+
+        var leftColliders = new RaycastHit2D[16];
+        var rightColliders = new RaycastHit2D[16];
+
+        bottomLeftColliderBuffer.Clear();
+        bottomRightColliderBuffer.Clear();
+
+        List<RaycastHit2D> leftColliderBuffer = new List<RaycastHit2D>();
+        List<RaycastHit2D> rightColliderBuffer = new List<RaycastHit2D>();
+
+        int leftCollisions = rigidBody.Cast(Vector2.left, contactFilterTerrain, leftColliders, CollisionDistance);
+        int rightCollisions = rigidBody.Cast(Vector2.right, contactFilterTerrain, rightColliders, CollisionDistance);
+
+        int bottomLeftCollisions = Physics2D.Raycast(rigidBody.transform.position, new Vector2(-1, -1), contactFilterGround, bottomLeftColliders, 1f);
+        int bottomRightCollisions = Physics2D.Raycast(rigidBody.transform.position, new Vector2(1, -1), contactFilterGround, bottomRightColliders, 1f);
+
+        leftColliderBuffer.AddRange(leftColliders.Where(l => l.collider != null));
+        rightColliderBuffer.AddRange(rightColliders.Where(r => r.collider != null));
+
+        bottomLeftColliderBuffer.AddRange(bottomLeftColliders.Where(l => l.collider != null));
+        bottomRightColliderBuffer.AddRange(bottomRightColliders.Where(r => r.collider != null));
+
+        if (
+                isMovingLeft
+                && (leftColliderBuffer.Any() == false
+                || leftColliderBuffer.Any(c => c.distance > 0.1f))
+                && bottomLeftCollisions > 0
+
+            )
+        {
+            move.x = -0.2f;
+            isMovingLeft = true;
+        }
+        else
+        {
+            isMovingLeft = false;
+        }
+
+        if (
+                isMovingLeft == false
+                && (rightColliderBuffer.Any() == false
+                || rightColliderBuffer.Any(c => c.distance > 0.1f))
+                && bottomRightCollisions > 0
+            )
+        {
+            move.x = 0.2f;
+            isMovingLeft = false;
+        }
+        else
+        {
+            isMovingLeft = true;
+        }
+
+        return move;
+    }
+
+    Vector2 getMoveForFollowPlayer(Vector2 move)
+    {
+        Debug.DrawLine(transform.position + Vector3.left * 1.0f, new Vector2(transform.position.x - 1.0f, transform.position.y - 100f), Color.blue, 0.1f);
+        Debug.DrawLine(new Vector2(transform.position.x + 1.0f, transform.position.y), new Vector2(transform.position.x + 1.0f, transform.position.y - 100f), Color.yellow, 0.1f);
+
+        var leftColliders = new RaycastHit2D[16];
+        var rightColliders = new RaycastHit2D[16];
+
+        bottomLeftColliderBuffer.Clear();
+        bottomRightColliderBuffer.Clear();
+
+        List<RaycastHit2D> leftColliderBuffer = new List<RaycastHit2D>();
+        List<RaycastHit2D> rightColliderBuffer = new List<RaycastHit2D>();
+
+        int leftCollisions = rigidBody.Cast(Vector2.left, contactFilterTerrain, leftColliders, CollisionDistance);
+        int rightCollisions = rigidBody.Cast(Vector2.right, contactFilterTerrain, rightColliders, CollisionDistance);
+
+        int bottomLeftCollisions = Physics2D.Raycast(transform.position + Vector3.left * 1.0f, Vector2.down, contactFilterThisLayer, bottomLeftColliders, 100f);
+        int bottomRightCollisions = Physics2D.Raycast(transform.position + Vector3.right * 1.0f, Vector2.down, contactFilterThisLayer, bottomRightColliders, 100f);
+
+        leftColliderBuffer.AddRange(leftColliders.Where(l => l.collider != null));
+        rightColliderBuffer.AddRange(rightColliders.Where(r => r.collider != null));
+
+        bottomLeftColliderBuffer.AddRange(bottomLeftColliders.Where(l => l.collider != null));
+        bottomRightColliderBuffer.AddRange(bottomRightColliders.Where(r => r.collider != null));
+
+        var playerDirection = getPlayerDirection(leftColliderBuffer.ToArray(), rightColliderBuffer.ToArray());
+
+        if (playerDirection < 0.0 && bottomLeftColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false)
+        {
+            move.x = playerDirection;
+            isMovingLeft = true;
+        }
+        else if (playerDirection > 0.0 && bottomRightColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false)
+        {
+            move.x = playerDirection;
+            isMovingLeft = false;
+        }
+        else
+        {
+            if (
+                    isMovingLeft
+                    && (leftColliderBuffer.Any() == false
+                    || leftColliderBuffer.Any(c => c.collider != null && c.distance > 0.1f))
+                    && bottomLeftColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false
+
+                )
+            {
+                move.x = -0.2f;
+                isMovingLeft = true;
+            }
+            else
+            {
+                isMovingLeft = false;
+            }
+
+            if (
+                    isMovingLeft == false
+                    && (rightColliderBuffer.Any() == false
+                    || rightColliderBuffer.Any(c => c.collider != null && c.distance > 0.1f))
+                    && bottomRightColliderBuffer.Any(c => c.collider.gameObject.tag == "KillZone") == false
+                )
+            {
+                move.x = 0.2f;
+                isMovingLeft = false;
+            }
+            else
+            {
+                isMovingLeft = true;
+            }
+        }
+
+        return move;
+    }
+
+
 
     private float getPlayerDirection(RaycastHit2D[] leftColliderBuffer, RaycastHit2D[] rightColliderBuffer)
     {

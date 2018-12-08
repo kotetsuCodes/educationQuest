@@ -6,11 +6,25 @@ public class EnemyController : PhysicsObject
 {
 
     public float maxSpeed = 0.001f;
+    public float jumpTakeOffSpeed = 7;
     public float DamagePerHit = 0.5f;
 
     public float CollisionDistance;
     public bool FollowPlayer = false;
     public bool CheckForCliffs = false;
+
+    public bool ContinuousMotion = true;
+
+    // public float MovementPauseTime = 5.0f;
+
+    float MovementPauseStart;
+    float MovementPauseEnd;
+
+    float MovementBeginStart;
+    float MovementBeginEnd;
+
+    // public float MovementMotionTime = 5.0f;
+    bool isInMotion;
 
     bool isMovingLeft = true;
 
@@ -33,6 +47,20 @@ public class EnemyController : PhysicsObject
     ContactFilter2D contactFilterThisLayer;
     ContactFilter2D contactFilterGround;
 
+    private float nextJumpTime;
+
+    readonly float movementPauseDurationUpperBound = 1.5f;
+    readonly float movementPauseDurationLowerBound = 3.0f;
+
+    readonly float movementDurationUpperBound = 1.0f;
+    readonly float movementDurationLowerBound = 8.0f;
+
+    // readonly float jumpTimePauseLowerBound = 3.0f;
+    // readonly float jumpTimePauseUpperBound = 10.0f;
+
+    readonly float jumpTimePauseLowerBound = 5.0f;
+    readonly float jumpTimePauseUpperBound = 12.0f;
+
     // Use this for initialization
     void Awake()
     {
@@ -52,11 +80,48 @@ public class EnemyController : PhysicsObject
         contactFilterGround.useTriggers = false;
         contactFilterGround.SetLayerMask(LayerMask.GetMask("Ground"));
         contactFilterGround.useLayerMask = true;
+
+        isInMotion = true;
+
+        MovementBeginStart = Time.time;
+        MovementBeginEnd = Time.time + Random.Range(movementDurationLowerBound, movementDurationUpperBound);
+
+        MovementPauseStart = MovementBeginEnd;
+        MovementPauseEnd = MovementPauseStart + Random.Range(movementPauseDurationLowerBound, movementPauseDurationUpperBound);
+
+        nextJumpTime = Time.time + Random.Range(jumpTimePauseLowerBound, jumpTimePauseUpperBound);
+
     }
 
     protected override void ComputeVelocity()
     {
-        if (GameManager.instance.CharactersCanMove)
+        // determine if we pause
+
+        bool canMove = true;
+
+        if (!ContinuousMotion)
+        {
+            // isInMotion - boolean for determining if the enemy is currently moving
+            // MovementMotionTime - The timestamp for when the enemy starts moving again
+            // MovementPauseTime - The timestamp for when the enemy pauses again
+
+            if (Time.time > MovementBeginStart && Time.time < MovementBeginEnd)
+            {
+                canMove = true;
+
+                MovementPauseStart = MovementBeginEnd;
+                MovementPauseEnd = MovementPauseStart + Random.Range(movementPauseDurationLowerBound, movementPauseDurationUpperBound);
+            }
+            else if (Time.time > MovementPauseStart && Time.time < MovementPauseEnd)
+            {
+                canMove = false;
+
+                MovementBeginStart = MovementPauseEnd;
+                MovementBeginEnd = MovementBeginStart + Random.Range(movementDurationLowerBound, movementDurationUpperBound);
+            }
+        }
+
+        if (canMove && GameManager.instance.CharactersCanMove)
         {
             Vector2 move = Vector2.zero;
 
@@ -79,6 +144,19 @@ public class EnemyController : PhysicsObject
                 move = getMoveForDoNotCheckForCliffs(move);
             }
 
+            // do jump
+            if (Time.time >= nextJumpTime)
+            {
+                Debug.Log("Jumping!!");
+                // velocity.y = grounded ? jumpTakeOffSpeed : velocity.y = velocity.y * 0.5f;
+                velocity.y = jumpTakeOffSpeed;
+            }
+
+            if (nextJumpTime < Time.time)
+            {
+                nextJumpTime = Time.time + Random.Range(jumpTimePauseLowerBound, jumpTimePauseUpperBound);
+            }
+
             bool flipSprite = (spriteRenderer.flipX ? move.x > 0.01f : (move.x < 0.01f));
 
             if (flipSprite)
@@ -88,6 +166,10 @@ public class EnemyController : PhysicsObject
             animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / maxSpeed);
 
             targetVelocity = move * maxSpeed;
+        }
+        else
+        {
+            animator.SetFloat("velocityX", 0.0f);
         }
     }
 

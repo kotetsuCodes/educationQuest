@@ -18,13 +18,12 @@ GameObject:
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 224126769819486062}
+  - component: {fileID: 4925466407351356}
   - component: {fileID: 212820368386416432}
   - component: {fileID: 50994785927176762}
   - component: {fileID: 70812079313379820}
   - component: {fileID: 95458233743531100}
   - component: {fileID: 114519752576030690}
-  - component: {fileID: 222631518877154302}
   - component: {fileID: 82371273513219510}
   m_Layer: 0
   m_Name: Player
@@ -33,6 +32,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &4925466407351356
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1616075542749844}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -127.23, y: 10.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &50994785927176762
 Rigidbody2D:
   serializedVersion: 4
@@ -196,8 +208,9 @@ MonoBehaviour:
   gravityModifier: 0.5
   maxSpeed: 3.5
   jumpTakeOffSpeed: 10
-  jumpSound: {fileID: 8300000, guid: 901c0ed50ddb1f44c805e14f2e64f815, type: 3}
+  jumpSound: {fileID: 8300000, guid: e11dc92d2be094d4681b1a090ff17578, type: 3}
   damageSound: {fileID: 8300000, guid: df8e9fb92740eae469586f6a8aba4ac4, type: 3}
+  walkSound: {fileID: 8300000, guid: d6930eda83148b44cba02748083e19ff, type: 3}
 --- !u!212 &212820368386416432
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -232,7 +245,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 718cabd96eda4cb488ee85e84753eba1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -244,28 +257,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!222 &222631518877154302
-CanvasRenderer:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1616075542749844}
-  m_CullTransparentMesh: 0
---- !u!224 &224126769819486062
-RectTransform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1616075542749844}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -89.62, y: 1.88}
-  m_SizeDelta: {x: 1, y: 1}
-  m_Pivot: {x: 0.5, y: 0.5}

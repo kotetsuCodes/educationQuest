@@ -6,9 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/DuskyMountains.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 1
     path: Assets/Scenes/ExtraordinaryPlains.unity
     guid: c1f9a0952f4c2804f881a0b89c87c1f7
+  - enabled: 1
+    path: Assets/Scenes/DuskyMountains.unity
+    guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects: {}

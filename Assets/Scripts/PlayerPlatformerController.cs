@@ -16,6 +16,7 @@ public class PlayerPlatformerController : PhysicsObject
 
     public AudioClip jumpSound;
     public AudioClip damageSound;
+    public AudioClip walkSound;
 
 
     // Use this for initialization
@@ -57,6 +58,15 @@ public class PlayerPlatformerController : PhysicsObject
             animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / maxSpeed);
 
             targetVelocity = move * maxSpeed;
+
+            if (grounded && (targetVelocity.x > 0.0 || targetVelocity.x < 0.0))
+            {
+                PlayWalkSound();
+            }
+            else
+            {
+                StopWalkSound();
+            }
         }
     }
 
@@ -77,6 +87,21 @@ public class PlayerPlatformerController : PhysicsObject
         audioSource.Play();
 
         StartCoroutine(RunDelayedDamageEffects());
+    }
+
+    void PlayWalkSound()
+    {
+        if (!audioSource.isPlaying)
+        {
+            audioSource.clip = walkSound;
+            audioSource.Play();
+        }
+    }
+
+    void StopWalkSound()
+    {
+        if (audioSource.clip == walkSound)
+            audioSource.Stop();
     }
 
     IEnumerator RunDelayedDamageEffects()

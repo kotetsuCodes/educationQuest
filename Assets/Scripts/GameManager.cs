@@ -120,7 +120,7 @@ public class GameManager : MonoBehaviour
         panelImage.type = Image.Type.Sliced;
         panelImage.name = "HUDContainer";
 
-        panelImage.color = new Color(0, 0, 0, 0.5f);
+        panelImage.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);
 
         var panelImageRectTransform = panelImage.GetComponent<RectTransform>();
 
@@ -223,9 +223,11 @@ public class GameManager : MonoBehaviour
             healthPoints[i].transform.SetParent(panelImage.transform);
 
             var rectTransform = healthPoints[i].GetComponent<RectTransform>();
-            rectTransform.pivot = new Vector2(0, 1);
-            rectTransform.anchorMin = new Vector2(0, 1);
-            rectTransform.anchorMax = new Vector2(0, 1);
+            rectTransform.pivot = new Vector2(0, 0.5f);
+            rectTransform.anchorMin = new Vector2(0, 0.5f);
+            rectTransform.anchorMax = new Vector2(0, 0.5f);
+            rectTransform.offsetMin = new Vector2(1, 0.5f);
+            rectTransform.offsetMax = new Vector2(1, 0.5f);
             rectTransform.anchoredPosition = new Vector2(anchoredPositionX, 0);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 16);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 16);

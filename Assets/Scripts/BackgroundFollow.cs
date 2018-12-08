@@ -5,7 +5,8 @@ public class BackgroundFollow : MonoBehaviour
 
     public float ScrollSpeed;
     private Vector2 savedOffset;
-    Camera mainCamera;
+    public Camera target;
+    // public Camera targetCamera;
     Renderer rendererReference;
     float lastOffsetX = 0.0f;
 
@@ -15,9 +16,10 @@ public class BackgroundFollow : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        target = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         rendererReference = GetComponent<Renderer>();
         savedOffset = rendererReference.sharedMaterial.GetTextureOffset("_MainTex");
+        // camera = target.GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -26,18 +28,18 @@ public class BackgroundFollow : MonoBehaviour
         // lock position to camera
 
         if (FollowX && FollowY)
-            transform.position = new Vector3(mainCamera.transform.position.x, mainCamera.transform.position.y, transform.position.z);
+            transform.position = new Vector3(target.transform.position.x, target.transform.position.y, transform.position.z);
         else if (FollowX)
-            transform.position = new Vector3(mainCamera.transform.position.x, transform.position.y, transform.position.z);
+            transform.position = new Vector3(target.transform.position.x, transform.position.y, transform.position.z);
         else if (FollowY)
-            transform.position = new Vector3(transform.position.x, mainCamera.transform.position.y, transform.position.z);
+            transform.position = new Vector3(transform.position.x, target.transform.position.y, transform.position.z);
 
         var inputAxis = Input.GetAxis("Horizontal");
 
         // Debug.Log($"inputAxis: {inputAxis}");
 
         // character is moving right
-        if (Vector3.Distance(mainCamera.velocity, Vector3.zero) >= 0.01f)
+        if (Vector3.Distance(target.velocity, Vector3.zero) >= 0.01f)
         {
             if (inputAxis > 0.0)
             {

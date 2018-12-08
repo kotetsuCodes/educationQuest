@@ -319,13 +319,12 @@ MonoBehaviour:
   minGroundNormalY: 0.65
   gravityModifier: 1
   maxSpeed: 5
-  DamagePerHit: 0.5
+  jumpTakeOffSpeed: 7
+  DamagePerHit: 0.25
   CollisionDistance: 8
   FollowPlayer: 0
   CheckForCliffs: 1
   ContinuousMotion: 0
-  MovementPauseTime: 5
-  MovementMotionTime: 5
 --- !u!50 &276040178
 Rigidbody2D:
   serializedVersion: 4

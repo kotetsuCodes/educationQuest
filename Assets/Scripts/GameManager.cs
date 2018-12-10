@@ -200,6 +200,14 @@ public class GameManager : MonoBehaviour
         UpdateCoinUI(PlayerCoins);
     }
 
+    public void PlayerHealthPickup(float healthIncrease)
+    {
+        var newHealthAmount = PlayerHealth + healthIncrease;
+
+        PlayerHealth = Mathf.Clamp(newHealthAmount, 0.0f, MaxPlayerHealth);
+        CalculateHealthSprites(PlayerHealth);
+    }
+
     public void CalculateHealthSprites(float health)
     {
         foreach (var hp in healthPoints.Where(h => h != null))

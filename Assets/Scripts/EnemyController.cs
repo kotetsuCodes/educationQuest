@@ -147,7 +147,6 @@ public class EnemyController : PhysicsObject
             // do jump
             if (Time.time >= nextJumpTime)
             {
-                Debug.Log("Jumping!!");
                 // velocity.y = grounded ? jumpTakeOffSpeed : velocity.y = velocity.y * 0.5f;
                 velocity.y = jumpTakeOffSpeed;
             }
@@ -359,8 +358,6 @@ public class EnemyController : PhysicsObject
 
         return move;
     }
-
-
 
     private float getPlayerDirection(RaycastHit2D[] leftColliderBuffer, RaycastHit2D[] rightColliderBuffer)
     {

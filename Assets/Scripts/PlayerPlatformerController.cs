@@ -18,6 +18,9 @@ public class PlayerPlatformerController : PhysicsObject
     public AudioClip damageSound;
     public AudioClip walkSound;
 
+    float jumpModifier = 0.0f;
+    private bool isOnJumper;
+    private bool isOnLadder = false;
 
     // Use this for initialization
     void Awake()
@@ -38,16 +41,16 @@ public class PlayerPlatformerController : PhysicsObject
 
             move.x = Input.GetAxis("Horizontal");
 
-            if (Input.GetButtonDown("Jump") && grounded)
+            var verticalAxis = Input.GetAxis("Vertical");
+
+            if (isOnLadder)
             {
-                playJumpSound();
-                velocity.y = jumpTakeOffSpeed;
+                Helpers.DebugValue("verticalAxis: ", verticalAxis);
+                // move.y = Input.GetAxis("Vertical");
+                velocity.y = verticalAxis * 2.0f;
             }
-            else if (Input.GetButtonUp("Jump"))
-            {
-                if (velocity.y > 0)
-                    velocity.y = velocity.y * 0.5f;
-            }
+
+            setJumpVelocity(ref velocity);
 
             bool flipSprite = (spriteRenderer.flipX ? move.x > 0.01f : (move.x < -0.01f));
 
@@ -56,6 +59,8 @@ public class PlayerPlatformerController : PhysicsObject
 
             animator.SetBool("grounded", grounded);
             animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / maxSpeed);
+
+            animator.SetBool("isClimbing", Mathf.Abs(verticalAxis) > 0.0 && isOnLadder);
 
             targetVelocity = move * maxSpeed;
 
@@ -75,6 +80,49 @@ public class PlayerPlatformerController : PhysicsObject
         if (collision.collider.tag == "Enemy")
         {
             DamagePlayer(0.5f);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Jumper")
+        {
+            jumpModifier = 5.0f;
+            isOnJumper = true;
+
+            collision.gameObject.GetComponent<Animator>().Play("Active", 0);
+        }
+        else if (collision.gameObject.tag == "Ladder")
+        {
+            Debug.Log("We are touching a ladder");
+            isOnLadder = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Jumper")
+        {
+            jumpModifier = 0.0f;
+            isOnJumper = false;
+        }
+        else if (collision.gameObject.tag == "Ladder")
+        {
+            isOnLadder = false;
+        }
+    }
+
+    private void setJumpVelocity(ref Vector2 velocity)
+    {
+        if (isOnJumper || (Input.GetButtonDown("Jump") && (grounded || isOnLadder)))
+        {
+            playJumpSound();
+            velocity.y = jumpTakeOffSpeed + jumpModifier;
+        }
+        else if (Input.GetButtonUp("Jump"))
+        {
+            if (velocity.y > 0)
+                velocity.y = velocity.y * 0.5f;
         }
     }
 

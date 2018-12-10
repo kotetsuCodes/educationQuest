@@ -12,6 +12,8 @@ TagManager:
   - LevelManager
   - KillZone
   - Ground
+  - Jumper
+  - Ladder
   layers:
   - Default
   - TransparentFX

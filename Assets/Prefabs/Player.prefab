@@ -90,7 +90,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -211,6 +211,7 @@ MonoBehaviour:
   jumpSound: {fileID: 8300000, guid: e11dc92d2be094d4681b1a090ff17578, type: 3}
   damageSound: {fileID: 8300000, guid: df8e9fb92740eae469586f6a8aba4ac4, type: 3}
   walkSound: {fileID: 8300000, guid: d6930eda83148b44cba02748083e19ff, type: 3}
+  jewelFanfare: {fileID: 8300000, guid: 5f8787e9be244a24685da9bece35e109, type: 3}
 --- !u!212 &212820368386416432
 SpriteRenderer:
   m_ObjectHideFlags: 1

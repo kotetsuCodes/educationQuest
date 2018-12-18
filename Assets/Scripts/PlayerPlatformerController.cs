@@ -17,6 +17,7 @@ public class PlayerPlatformerController : PhysicsObject
     public AudioClip jumpSound;
     public AudioClip damageSound;
     public AudioClip walkSound;
+    public AudioClip jewelFanfare;
 
     float jumpModifier = 0.0f;
     private bool isOnJumper;
@@ -97,6 +98,15 @@ public class PlayerPlatformerController : PhysicsObject
             Debug.Log("We are touching a ladder");
             isOnLadder = true;
         }
+        else if (collision.gameObject.tag == "Jewel")
+        {
+            Destroy(collision.gameObject);
+            PlayFanfare();
+        }
+        else if (collision.gameObject.tag == "ChallengeDoor")
+        {
+            LevelManager.instance.BeginEndOfLevelChallenge();
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -150,6 +160,15 @@ public class PlayerPlatformerController : PhysicsObject
     {
         if (audioSource.clip == walkSound)
             audioSource.Stop();
+    }
+
+    void PlayFanfare()
+    {
+        audioSource.clip = jewelFanfare;
+        audioSource.Play();
+        LevelManager.instance.AddCollectedItem();
+
+
     }
 
     IEnumerator RunDelayedDamageEffects()

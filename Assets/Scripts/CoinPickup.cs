@@ -3,30 +3,28 @@
 public class CoinPickup : MonoBehaviour
 {
 
-    // SpriteRenderer coinSprite;
-
     AudioSource coinSound;
+    Renderer renderer;
     bool isDestroyed = false;
 
     // Use this for initialization
     void Start()
     {
-        // coinSprite = GetComponent<SpriteRenderer>();
+        renderer = GetComponent<Renderer>();
         coinSound = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Helpers.DebugValue("coinSound.isPlaying: ", coinSound.isPlaying);
-        Helpers.DebugValue("isDestroyed:", isDestroyed);
+        // var newRotation = Quaternion.AngleAxis(2.0f, Vector3.forward);
+
+        transform.Rotate(new Vector3(transform.rotation.x, transform.rotation.y + 5, transform.rotation.z));
 
         if (isDestroyed && coinSound.isPlaying == false)
         {
-            Debug.Log("Destroying coin");
             Destroy(gameObject);
         }
-
 
     }
 
@@ -47,19 +45,13 @@ public class CoinPickup : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("Collision occurred");
 
         if (collision.gameObject.tag == "Player")
         {
-            Debug.Log("Collision with player");
-            // coinSprite.enabled = false;
+            renderer.enabled = false;
             GameManager.instance.PlayerCoinPickup();
             coinSound.Play();
             isDestroyed = true;
-        }
-        else
-        {
-            Debug.Log(collision.gameObject.tag);
         }
     }
 }

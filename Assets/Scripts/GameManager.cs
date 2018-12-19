@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance = null;
 
+    public int PlayerLifeCount = 5;
+
     public float MaxPlayerHealth = 5.0f;
     public float PlayerHealth = 5.0f;
 
@@ -31,15 +33,17 @@ public class GameManager : MonoBehaviour
 
     public Sprite CoinSprite;
 
+    public int StartingLevelIndex = 2;
+
     public Dictionary<int, HashSet<string>> challengeWords = new Dictionary<int, HashSet<string>>
     {
-        { 0, new HashSet<string> { "if", "is", "him", "rip", "fit", "pin", "and", "be", "you", "an", "bad", "can", "had", "cat", "ran"} },
-        { 1, new HashSet<string> { "ox", "log", "dot", "top", "hot", "lot", "fox", "dog", "us", "sun", "but", "fun", "bus", "run", "eat", "put", "one" } },
-        { 2, new HashSet<string> { "with", "away", "find", "sing", "yet", "wet", "web", "leg", "pen", "hen", "me", "my", "add", "pass" } },
-        { 3, new HashSet<string> { "up", "bug", "mud", "nut", "hug", "tub", "full", "pull", "take", "small", "give", "every" } },
-        { 4, new HashSet<string> { "does", "here", "am", "at", "sat", "man", "dad", "mat", "ran", "sad", "van", "mad", "on", "got", "fox", "pop",  } },
-        { 5, new HashSet<string> { "not", "hop", "her", "now", "that", "then", "this", "them", "with", "bath", "blue", "water", "live" } },
-        { 6, new HashSet<string> { "where", "their", "good", "hold", "many", "friend", "little", "today", "hibernate", "classify", "block", "clock", "would", "musical" } },
+        { 2, new HashSet<string> { "if", "is", "him", "rip", "fit", "pin", "and", "be", "you", "an", "bad", "can", "had", "cat", "ran"} },
+        { 3, new HashSet<string> { "ox", "log", "dot", "top", "hot", "lot", "fox", "dog", "us", "sun", "but", "fun", "bus", "run", "eat", "put", "one" } },
+        { 4, new HashSet<string> { "with", "away", "find", "sing", "yet", "wet", "web", "leg", "pen", "hen", "me", "my", "add", "pass" } },
+        { 5, new HashSet<string> { "up", "bug", "mud", "nut", "hug", "tub", "full", "pull", "take", "small", "give", "every" } },
+        { 6, new HashSet<string> { "does", "here", "am", "at", "sat", "man", "dad", "mat", "ran", "sad", "van", "mad", "on", "got", "fox", "pop",  } },
+        { 7, new HashSet<string> { "not", "hop", "her", "now", "that", "then", "this", "them", "with", "bath", "blue", "water", "live" } },
+        { 8, new HashSet<string> { "where", "their", "good", "hold", "many", "friend", "little", "today", "hibernate", "classify", "block", "clock", "would", "musical" } },
         //{ 5, new string[] {   } },
         //{ 6, new string[] { "", "", "", "", "" } },
         //{ 7, new string[] { "", "", "", "", "" } },
@@ -72,12 +76,16 @@ public class GameManager : MonoBehaviour
         WordFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
         audioSource = GetComponent<AudioSource>();
+    }
 
-        Debug.Log("GameManager start was called");
+    public void StartGame()
+    {
+        LevelManager.instance.CurrentSceneBuildIndex = GameManager.instance.StartingLevelIndex;
+        SceneManager.LoadScene(LevelManager.instance.CurrentSceneBuildIndex);
         Canvas = GameObject.FindGameObjectWithTag("UICanvas").GetComponent<Canvas>();
         BuildUI();
 
-        InitGame();
+        InitGame(LevelManager.instance.CurrentSceneBuildIndex);
     }
 
     // Update is called once per frame
@@ -98,7 +106,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void InitGame()
+    public void InitGame(int sceneBuildIndex)
     {
         Debug.Log("InitGame was called");
 
@@ -108,7 +116,7 @@ public class GameManager : MonoBehaviour
         CalculateHealthSprites(MaxPlayerHealth);
         UpdateCoinUI(StartingPlayerCoins);
 
-        LevelManager.instance.InitializeLevelManager(challengeWords[SceneManager.GetActiveScene().buildIndex]);
+        LevelManager.instance.InitializeLevelManager(challengeWords[sceneBuildIndex]);
     }
 
     void BuildUI()
@@ -189,9 +197,17 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        --PlayerLifeCount;
+
         // fade screen to black etc.
-        SceneManager.LoadScene(0);
-        InitGame();
+        if (PlayerLifeCount <= 0)
+        {
+            SceneManager.LoadScene(0);
+        }
+        else
+        {
+            InitGame(LevelManager.instance.CurrentSceneBuildIndex);
+        }
     }
 
     public void PlayerCoinPickup()

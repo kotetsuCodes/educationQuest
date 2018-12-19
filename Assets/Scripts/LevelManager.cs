@@ -19,6 +19,8 @@ public class LevelManager : MonoBehaviour
     public float timeBetweenChallengeSelect = 0.1f;
     private float timestamp;
 
+    public int CurrentSceneBuildIndex;
+
     private void Awake()
     {
         if (instance == null)
@@ -57,6 +59,10 @@ public class LevelManager : MonoBehaviour
     {
         if (LevelCompleted == false && ChallengeMode)
         {
+            CurrentSceneBuildIndex = SceneManager.GetActiveScene().buildIndex;
+
+            SceneManager.LoadScene("ChallengeMode");
+
             // select random challenge word
             if (!challengeModeWords.Any(w => w.IsCurrentWord))
             {
@@ -131,8 +137,9 @@ public class LevelManager : MonoBehaviour
     {
         if (LevelCompleted)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-            GameManager.instance.InitGame();
+            var nextLevelIndex = CurrentSceneBuildIndex + 1;
+            SceneManager.LoadScene(nextLevelIndex);
+            GameManager.instance.InitGame(nextLevelIndex);
         }
     }
 

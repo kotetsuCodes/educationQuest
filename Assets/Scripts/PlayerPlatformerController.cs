@@ -107,6 +107,11 @@ public class PlayerPlatformerController : PhysicsObject
         {
             LevelManager.instance.BeginEndOfLevelChallenge();
         }
+        else if (collision.gameObject.tag == "KillZone")
+        {
+            Debug.Log("KillZone was entered");
+            GameManager.instance.GameOver();
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)

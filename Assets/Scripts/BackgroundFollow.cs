@@ -66,6 +66,7 @@ public class BackgroundFollow : MonoBehaviour
 
     private void OnDisable()
     {
-        rendererReference.sharedMaterial.SetTextureOffset("_MainTex", savedOffset);
+        if (rendererReference != null)
+            rendererReference.sharedMaterial.SetTextureOffset("_MainTex", savedOffset);
     }
 }

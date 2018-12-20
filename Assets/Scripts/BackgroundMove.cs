@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BackgroundMove : MonoBehaviour
 {
@@ -33,6 +31,7 @@ public class BackgroundMove : MonoBehaviour
 
     private void OnDisable()
     {
-        rendererReference.sharedMaterial.SetTextureOffset("_MainTex", savedOffset);
+        if (rendererReference != null)
+            rendererReference.sharedMaterial.SetTextureOffset("_MainTex", savedOffset);
     }
 }

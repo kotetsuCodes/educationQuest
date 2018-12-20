@@ -108,8 +108,6 @@ public class GameManager : MonoBehaviour
 
     public void InitGame(int sceneBuildIndex)
     {
-        Debug.Log("InitGame was called");
-
         PlayerHealth = MaxPlayerHealth;
         PlayerCoins = StartingPlayerCoins;
 
@@ -117,6 +115,7 @@ public class GameManager : MonoBehaviour
         UpdateCoinUI(StartingPlayerCoins);
 
         LevelManager.instance.InitializeLevelManager(challengeWords[sceneBuildIndex]);
+        CharactersCanMove = true;
     }
 
     void BuildUI()
@@ -206,6 +205,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            SceneManager.LoadScene(LevelManager.instance.CurrentSceneBuildIndex);
             InitGame(LevelManager.instance.CurrentSceneBuildIndex);
         }
     }

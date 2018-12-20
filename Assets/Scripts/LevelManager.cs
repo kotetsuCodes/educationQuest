@@ -59,10 +59,6 @@ public class LevelManager : MonoBehaviour
     {
         if (LevelCompleted == false && ChallengeMode)
         {
-            CurrentSceneBuildIndex = SceneManager.GetActiveScene().buildIndex;
-
-            SceneManager.LoadScene("ChallengeMode");
-
             // select random challenge word
             if (!challengeModeWords.Any(w => w.IsCurrentWord))
             {
@@ -158,7 +154,9 @@ public class LevelManager : MonoBehaviour
 
     public void BeginEndOfLevelChallenge()
     {
-        Debug.Log("BeginEndofLevelChallenge was called");
+        CurrentSceneBuildIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene("ChallengeMode");
+
         GameManager.instance.CharactersCanMove = false;
 
         for (var i = 0; i < CollectedChallengeWords.Count; i++)
